@@ -51,7 +51,7 @@ export function Contact() {
                       </span>
                       <span className="block truncate text-sm text-muted-dark">
                         {siteConfig.isWhatsAppConfigured
-                          ? `+${siteConfig.whatsAppNumber}`
+                          ? siteConfig.whatsAppDisplay
                           : "Number coming soon — use the form"}
                       </span>
                     </span>

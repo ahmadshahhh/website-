@@ -1,4 +1,5 @@
 import "server-only";
+import { CONTACT_EMAIL } from "@/config/site";
 import type { ContactValues } from "@/lib/validation";
 
 /**
@@ -31,10 +32,8 @@ import type { ContactValues } from "@/lib/validation";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY?.trim() ?? "";
 const FROM_EMAIL = process.env.CONTACT_FROM_EMAIL?.trim() ?? "";
-const TO_EMAIL =
-  process.env.CONTACT_TO_EMAIL?.trim() ||
-  process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() ||
-  "";
+/** Where enquiries are delivered. Defaults to the public contact address. */
+const TO_EMAIL = process.env.CONTACT_TO_EMAIL?.trim() || CONTACT_EMAIL;
 
 /** True only when every value needed to actually deliver mail is present. */
 export function isEmailDeliveryConfigured(): boolean {

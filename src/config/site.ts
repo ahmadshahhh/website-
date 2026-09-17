@@ -6,9 +6,11 @@
  * here updates it everywhere on the site (nav, footer, contact, SEO, schema).
  *
  * Anything a visitor could act on — phone number, email, address, map link —
- * is read from environment variables so it can be changed without touching
- * code, and so the site never displays a placeholder as if it were real.
- * See .env.example for the full list.
+ * can be overridden by an environment variable, so it can be changed per
+ * deployment without touching code. The WhatsApp number and contact email
+ * carry committed defaults so they work everywhere with no setup; the rest
+ * stay empty, and anything still empty is hidden rather than shown to
+ * visitors as a placeholder. See .env.example for the full list.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -30,17 +32,65 @@ export const SITE_URL =
   env(process.env.NEXT_PUBLIC_SITE_URL).replace(/\/$/, "") ||
   "http://localhost:3000";
 
-/** WhatsApp number, digits only (e.g. 96512345678). Empty until configured. */
-const WHATSAPP_NUMBER = env(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER).replace(
-  /[^\d]/g,
-  "",
-);
+/**
+ * WhatsApp number in E.164 form: country code + national number, digits only,
+ * and NO leading zero on the national part.
+ *
+ * The owner's number is written locally as 0323 9713406 with country code +92.
+ * That leading 0 is a national trunk prefix and must be dropped when dialling
+ * internationally, so the value below is 92 followed by 3239713406 — writing
+ * it as 920323… would produce a wa.me link that does not resolve.
+ *
+ * Committed here so the button works everywhere without setup. Set
+ * NEXT_PUBLIC_WHATSAPP_NUMBER to override it for a specific deployment.
+ */
+const DEFAULT_WHATSAPP_NUMBER = "923239713406";
+
+const WHATSAPP_NUMBER =
+  env(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER).replace(/[^\d]/g, "") ||
+  DEFAULT_WHATSAPP_NUMBER;
 
 /** A usable WhatsApp number is 8–15 digits (ITU E.164 allows up to 15). */
 export const isWhatsAppConfigured =
   WHATSAPP_NUMBER.length >= 8 && WHATSAPP_NUMBER.length <= 15;
 
-export const CONTACT_EMAIL = env(process.env.NEXT_PUBLIC_CONTACT_EMAIL);
+/**
+ * Human-readable version of the number, e.g. +92 323 971 3406. Used only as a
+ * visible label — every link is built from the raw digits above.
+ */
+function formatPhone(digits: string): string {
+  if (!digits) return "";
+
+  // Country codes are 1–3 digits; longest match wins so 965 beats 92.
+  const countryCode =
+    ["965", "966", "968", "971", "973", "974", "92", "91", "44", "1"].find(
+      (code) => digits.startsWith(code),
+    ) ?? digits.slice(0, 2);
+
+  const national = digits.slice(countryCode.length);
+
+  const groups =
+    national.length === 8
+      ? [national.slice(0, 4), national.slice(4)]
+      : national.length === 9 || national.length === 10
+        ? [national.slice(0, 3), national.slice(3, 6), national.slice(6)]
+        : [national];
+
+  return `+${countryCode} ${groups.filter(Boolean).join(" ")}`.trim();
+}
+
+export const WHATSAPP_DISPLAY = formatPhone(WHATSAPP_NUMBER);
+
+/**
+ * Public contact address, shown in the contact section and the footer.
+ *
+ * Committed here so it works in every environment without any setup. Set
+ * NEXT_PUBLIC_CONTACT_EMAIL to override it for a specific deployment.
+ */
+const DEFAULT_CONTACT_EMAIL = "webzivodesignz@gmail.com";
+
+export const CONTACT_EMAIL =
+  env(process.env.NEXT_PUBLIC_CONTACT_EMAIL) || DEFAULT_CONTACT_EMAIL;
 export const isEmailConfigured = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(CONTACT_EMAIL);
 
 const MAPS_URL = env(process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL);
@@ -82,6 +132,7 @@ export const siteConfig = {
   email: CONTACT_EMAIL,
   isEmailConfigured,
   whatsAppNumber: WHATSAPP_NUMBER,
+  whatsAppDisplay: WHATSAPP_DISPLAY,
   isWhatsAppConfigured,
   mapsUrl: MAPS_URL,
   isMapsConfigured,

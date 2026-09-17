@@ -52,8 +52,10 @@ Other commands:
 
 ## Configure your details
 
-Everything personal to your business lives in **`.env.local`** — you never need to
-edit code to change a phone number or an email address.
+Your WhatsApp number and contact email are already set as committed defaults in
+**`src/config/site.ts`**, so they work in every environment with no setup. Every
+one of these values can also be overridden per deployment through **`.env.local`**,
+without touching code:
 
 ```bash
 cp .env.example .env.local
@@ -61,12 +63,17 @@ cp .env.example .env.local
 
 ### 📱 WhatsApp number
 
+Already set to **+92 323 971 3406** (`923239713406`), committed as
+`DEFAULT_WHATSAPP_NUMBER` in `src/config/site.ts`. Override it per deployment with:
+
 ```bash
-NEXT_PUBLIC_WHATSAPP_NUMBER=96512345678
+NEXT_PUBLIC_WHATSAPP_NUMBER=923239713406
 ```
 
-Digits only — no `+`, no spaces, no dashes. Kuwait's country code is `965`, so
-`1234 5678` becomes `96512345678`.
+Digits only — no `+`, no spaces, no dashes — and **drop the leading `0`** from the
+national part. That last point is the usual mistake: `+92 0323 9713406` written
+out as `9203239713406` produces a `wa.me` link that will not open. The correct
+value is `92` + `3239713406`.
 
 This one value powers the floating WhatsApp button, the contact section and the
 footer. Every WhatsApp link opens with this message pre-filled:
@@ -75,18 +82,20 @@ footer. Every WhatsApp link opens with this message pre-filled:
 
 To change that wording, edit `WHATSAPP_MESSAGE` in `src/config/site.ts`.
 
-**Until you set this**, the floating button links to the contact form instead of
-opening a broken `wa.me` link. That is deliberate.
+If the number is ever cleared, the floating button falls back to the contact form
+rather than opening a broken `wa.me` link. That is deliberate.
 
 ### ✉️ Email address
+
+Already set to **webzivodesignz@gmail.com**, committed as `DEFAULT_CONTACT_EMAIL`
+in `src/config/site.ts`. Override it per deployment with:
 
 ```bash
 NEXT_PUBLIC_CONTACT_EMAIL=hello@webzivo.com
 ```
 
-Shown in the contact section and the footer once set, and hidden until then.
-This is the address visitors see — it is separate from where form submissions are
-delivered (see the next section).
+This is the address visitors see, in the contact section and the footer. It is
+separate from where form submissions are delivered (see the next section).
 
 ### 📍 Google Maps link
 
@@ -133,6 +142,11 @@ CONTACT_TO_EMAIL=you@webzivo.com         # where enquiries land
 ```
 
 4. Restart the dev server, or redeploy.
+
+Note that `CONTACT_FROM_EMAIL` must be on a domain you own and have verified with
+the provider. A Gmail address cannot be used to *send* from — but enquiries can
+still be *delivered* to `webzivodesignz@gmail.com`, which is the default when
+`CONTACT_TO_EMAIL` is blank.
 
 **Using a different provider** (SendGrid, Postmark, Mailgun, SMTP…)? Replace the
 single `fetch` call in `deliver()` inside **`src/lib/email.ts`**. Validation, rate
@@ -245,8 +259,8 @@ environment variables on the host — they are not read from `.env.local` in pro
 ## Before you publish
 
 - [ ] `NEXT_PUBLIC_SITE_URL` set to your real domain
-- [ ] `NEXT_PUBLIC_WHATSAPP_NUMBER` set — click the floating button and confirm it opens the right chat
-- [ ] `NEXT_PUBLIC_CONTACT_EMAIL` set
+- [x] WhatsApp number set to +92 323 971 3406 — **click the floating button and confirm it opens your chat**
+- [x] Contact email set to webzivodesignz@gmail.com
 - [ ] Contact form connected to an email provider, and **a test submission received**
 - [ ] `NEXT_PUBLIC_GOOGLE_MAPS_URL` added (or accept that the directions buttons stay hidden)
 - [ ] Review the About and FAQ copy — adjust anything that doesn't match how you work
