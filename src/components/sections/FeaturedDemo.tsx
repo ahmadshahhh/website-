@@ -1,0 +1,97 @@
+import { Icon } from "@/components/icons";
+import { BrowserFrame } from "@/components/previews/Frames";
+import { SitePreview, previewUrl } from "@/components/previews/SitePreview";
+import { ButtonLink } from "@/components/ui/Button";
+import { Reveal } from "@/components/ui/Reveal";
+import { Eyebrow, Section } from "@/components/ui/Section";
+import { featuredProjectSlug, getProject, projects } from "@/config/projects";
+
+/**
+ * Large showcase for one project.
+ *
+ * Change `featuredProjectSlug` in src/config/projects.ts to feature a
+ * different project. Once a project has a `liveUrl`, the button below opens
+ * the real site instead of the in-site case study.
+ */
+export function FeaturedDemo() {
+  const project = getProject(featuredProjectSlug) ?? projects[0];
+  const hasLiveSite = Boolean(project.liveUrl);
+
+  return (
+    <Section tone="dark" className="overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="grid-texture pointer-events-none absolute inset-0 [mask-image:radial-gradient(75%_60%_at_70%_40%,#000,transparent)]"
+      />
+
+      <div className="relative grid items-center gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
+        {/* Copy */}
+        <div>
+          <Reveal>
+            <Eyebrow tone="dark">
+              {project.isDemo ? "Featured Demo" : "Featured Project"}
+            </Eyebrow>
+
+            <h2 className="display mt-5 text-[2rem] text-white sm:text-[2.6rem] lg:text-[3rem]">
+              {project.title}
+              {project.isDemo ? " Demo" : ""}
+            </h2>
+
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-dark sm:text-lg">
+              {project.description}
+            </p>
+          </Reveal>
+
+          <Reveal delay={100}>
+            <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+              {project.features.slice(0, 4).map((feature) => (
+                <li
+                  key={feature}
+                  className="flex items-start gap-2.5 text-[0.9375rem] leading-relaxed text-muted-dark"
+                >
+                  <Icon
+                    name="check"
+                    className="mt-1 size-4 shrink-0 text-accent-bright"
+                    strokeWidth={2.5}
+                  />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+
+          <Reveal delay={180}>
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <ButtonLink
+                href={project.liveUrl ?? `/work/${project.slug}`}
+                variant="inverse"
+                size="lg"
+                withArrow={!hasLiveSite}
+              >
+                View Demo
+                {hasLiveSite ? (
+                  <Icon name="arrowUpRight" className="size-4" />
+                ) : null}
+              </ButtonLink>
+              <ButtonLink href="/#contact" variant="inverseOutline" size="lg">
+                Request a Similar Website
+              </ButtonLink>
+            </div>
+          </Reveal>
+        </div>
+
+        {/* Preview */}
+        <Reveal delay={140} className="min-w-0">
+          <BrowserFrame
+            tone="dark"
+            url={`webzivo.com/work/${previewUrl(project.preview)}`}
+          >
+            <div className="aspect-[16/11]">
+              <SitePreview variant={project.preview} />
+            </div>
+          </BrowserFrame>
+        </Reveal>
+      </div>
+    </Section>
+  );
+}

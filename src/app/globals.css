@@ -1,0 +1,199 @@
+@import "tailwindcss";
+
+/* ───────────────────────────────────────────────────────────────────────────
+   WEBZIVO DESIGN SYSTEM
+   A monochrome palette — near-black, white, layered greys — with a single
+   warm accent used sparingly for emphasis. Tokens below are exposed as
+   Tailwind utilities (bg-ink, text-muted, border-line, …).
+   ─────────────────────────────────────────────────────────────────────────── */
+@theme {
+  /* Dark surfaces */
+  --color-ink: #0a0a0b;
+  --color-ink-900: #121215;
+  --color-ink-800: #1a1a1f;
+  --color-ink-700: #24242b;
+  --color-ink-line: #2c2c34;
+
+  /* Light surfaces */
+  --color-paper: #ffffff;
+  --color-paper-soft: #f7f7f8;
+  --color-paper-dim: #f0f0f2;
+
+  /* Hairline borders — the structural backbone of the layout */
+  --color-line: #e6e6e9;
+  --color-line-strong: #d4d4d9;
+
+  /* Text */
+  --color-muted: #6d6d77;
+  --color-muted-dark: #9c9ca8;
+
+  /* Single accent — warm gold, used for emphasis only */
+  --color-accent: #c08b2c;
+  --color-accent-bright: #e0a93f;
+  --color-accent-soft: #f6ecd8;
+  /* Darker gold for accent-coloured TEXT on light backgrounds.
+     5.5:1 on white - the lighter --color-accent is only 3:1 and is reserved
+     for icons, rules and dots, where the 3:1 graphics threshold applies. */
+  --color-accent-text: #8a6114;
+
+  /* WhatsApp green, darkened from the #25D366 brand tint so that white text
+     and the logo glyph clear 4.5:1 (brand tint manages only 2:1). Still
+     unmistakably WhatsApp thanks to the glyph. */
+  --color-whatsapp: #12823f;
+
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, "SFMono-Regular", Menlo,
+    monospace;
+
+  --radius-card: 14px;
+
+  --animate-reveal: reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  --animate-float: float 7s ease-in-out infinite;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+:root {
+  color-scheme: light;
+  /* Offset for the sticky header when jumping to an in-page anchor. */
+  scroll-padding-top: 6rem;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Stops horizontal scroll from decorative overflow on small screens. */
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+}
+
+/* A single, consistent focus ring everywhere — visible on light and dark. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Large headings: tight tracking and leading for an editorial, premium feel. */
+@utility display {
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+/* Small uppercase mono labels used above section headings. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Faint grid texture for dark sections. */
+@utility grid-texture {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* Same idea, inverted, for light sections. */
+@utility grid-texture-light {
+  background-image:
+    linear-gradient(to right, rgba(10, 10, 11, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 10, 11, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* ── Scroll reveal ────────────────────────────────────────────────────────────
+   Elements start hidden and animate in once observed. The `is-visible` class
+   is applied by the Reveal component. No-JS and reduced-motion users get the
+   fully visible state immediately (see below).
+   ────────────────────────────────────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+}
+
+.reveal.is-visible {
+  animation: var(--animate-reveal);
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+/* Native accordion marker removal for the FAQ. */
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+/* ── Accessibility: honour reduced-motion across the whole site ───────────── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Without JavaScript the reveal class never resolves, so show everything. */
+.no-js .reveal {
+  opacity: 1;
+  transform: none;
+}
+
+/* FAQ answers fade in when their <details> is opened. Using the native
+   element keeps the accordion keyboard- and screen-reader-accessible. */
+details[open] > .faq-answer {
+  animation: reveal 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
