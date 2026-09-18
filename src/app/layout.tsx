@@ -78,6 +78,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       // Lets Next.js keep route changes instant while in-page anchors scroll smoothly.
       data-scroll-behavior="smooth"
       // Removed immediately by the inline script below; see globals.css for the
