@@ -3,8 +3,8 @@
 Marketing website for **Webzivo** — website design and development for businesses in Kuwait.
 
 Built with Next.js 16 (App Router), TypeScript and Tailwind CSS v4. Every page is
-statically pre-rendered, there are no image assets to download, and the whole site
-runs on two self-hosted fonts and zero runtime UI dependencies.
+statically pre-rendered, the only images are the logo, and the whole site runs on
+two self-hosted fonts and zero runtime UI dependencies.
 
 ---
 
@@ -96,6 +96,36 @@ NEXT_PUBLIC_CONTACT_EMAIL=hello@webzivo.com
 
 This is the address visitors see, in the contact section and the footer. It is
 separate from where form submissions are delivered (see the next section).
+
+### 🖼️ Logo
+
+Your logo lives at **`public/logo.jpeg`** — the full square lockup (monogram,
+WEBZIVO, WEB DESIGN AGENCY, ESTD. 2026). It is what search engines use as the
+business logo.
+
+The header can't use that file directly: at the ~40px a header allows, the two
+smallest lines render around 2px tall and the grey backdrop shows as a box
+against the white header. So the header uses a **horizontal lockup cut from the
+same artwork** — the monogram and the WEBZIVO wordmark, each with the grey
+turned into transparency:
+
+- `public/logo-mark.png` — the WB monogram
+- `public/logo-wordmark.png` — the WEBZIVO wordmark
+
+Both are black, and the site flips them to white on dark backgrounds (the
+footer) in CSS, so there is only one copy of each to maintain.
+
+**To replace the logo**, drop your new file in as `public/logo.jpeg` and run:
+
+```bash
+pip install pillow
+python3 scripts/generate-logo-assets.py
+```
+
+It finds the stacked blocks automatically and prints what it detected — check
+that before committing. The script assumes dark artwork on a flat light
+background; for a different arrangement, adjust the crops in
+`src/components/ui/Logo.tsx` instead.
 
 ### 📍 Google Maps link
 

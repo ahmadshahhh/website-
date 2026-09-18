@@ -1,60 +1,64 @@
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * Webzivo wordmark. The mark is a geometric "W" drawn as a single stroke —
- * it reads clearly at favicon size as well as in the header.
+ * Webzivo logo lockup.
+ *
+ * The supplied brand asset (public/logo.jpeg) is a square, stacked lockup:
+ * monogram over "WEBZIVO" over "WEB DESIGN AGENCY" over "ESTD. 2026". At the
+ * ~40px height a site header allows, those last two lines render around 2px
+ * tall and turn to mush, and the artwork's light-grey backdrop shows as a box
+ * against the white header.
+ *
+ * So the header uses a horizontal lockup built from that same artwork: the
+ * monogram and the WEBZIVO wordmark, each cropped out and given a transparent
+ * background (see scripts/generate-logo-assets.py). Both stay legible at
+ * header size, and the full original is still shipped at public/logo.jpeg for
+ * social cards and search-engine metadata.
  */
 export function Logo({
   tone = "dark",
   className,
   href = "/",
 }: {
-  /** "dark" = dark text on light background. "light" = the inverse. */
+  /** "dark" = black artwork for light backgrounds. "light" = the inverse. */
   tone?: "dark" | "light";
   className?: string;
   href?: string;
 }) {
+  // The artwork is black, so dark surfaces get it flipped to solid white.
+  // brightness-0 flattens any anti-aliased greys before inverting, which keeps
+  // the edges clean rather than muddy.
+  const inkClass = tone === "light" ? "brightness-0 invert" : "";
+
   return (
     <Link
       href={href}
+      aria-label="Webzivo — home"
       className={cn(
-        "group inline-flex items-center gap-2.5 rounded-lg",
+        "group inline-flex shrink-0 items-center gap-2.5 rounded-lg transition-opacity duration-200 hover:opacity-70",
         className,
       )}
-      aria-label="Webzivo — home"
     >
-      <span
-        className={cn(
-          "relative grid size-9 shrink-0 place-items-center rounded-[10px] transition-transform duration-200 group-hover:-rotate-3",
-          tone === "dark" ? "bg-ink text-white" : "bg-white text-ink",
-        )}
-      >
-        <svg
-          viewBox="0 0 32 32"
-          className="size-[22px]"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M6 10.5 10.4 22 16 14.2 21.6 22 26 10.5" />
-        </svg>
-        <span
-          aria-hidden="true"
-          className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-accent-bright ring-2 ring-paper"
-        />
-      </span>
-      <span
-        className={cn(
-          "text-[1.35rem] font-extrabold tracking-[-0.035em]",
-          tone === "dark" ? "text-ink" : "text-white",
-        )}
-      >
-        Webzivo
-      </span>
+      {/* Both images are decorative: the link's aria-label carries the name,
+          so alt="" avoids it being announced three times over. */}
+      <Image
+        src="/logo-mark.png"
+        alt=""
+        width={410}
+        height={363}
+        priority
+        className={cn("h-9 w-auto sm:h-10", inkClass)}
+      />
+      <Image
+        src="/logo-wordmark.png"
+        alt=""
+        width={291}
+        height={49}
+        priority
+        className={cn("h-[14px] w-auto sm:h-4", inkClass)}
+      />
     </Link>
   );
 }

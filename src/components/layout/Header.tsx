@@ -107,14 +107,17 @@ export function Header() {
             </ul>
           </nav>
 
-          <div className="flex items-center gap-2">
-            <ButtonLink
-              href={primaryCta.href}
-              size="sm"
-              className="hidden sm:inline-flex"
-            >
-              {primaryCta.label}
-            </ButtonLink>
+          <div className="flex shrink-0 items-center gap-2">
+            {/* Visibility lives on a wrapper, not on the button itself: the
+                button's own `inline-flex` is a display utility, so a `hidden`
+                class passed alongside it loses the CSS conflict and the button
+                stays visible on small screens. Below sm the call to action is
+                in the mobile menu instead. */}
+            <span className="hidden sm:inline-flex">
+              <ButtonLink href={primaryCta.href} size="sm">
+                {primaryCta.label}
+              </ButtonLink>
+            </span>
 
             {/* Mobile menu toggle */}
             <button
