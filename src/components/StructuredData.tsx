@@ -18,6 +18,10 @@ export function StructuredData() {
     name: siteConfig.name,
     description: siteConfig.description,
     url: siteConfig.url,
+    // The full brand lockup, used by Google for the business logo. The header
+    // uses cropped versions of this same artwork - see components/ui/Logo.tsx.
+    logo: `${siteConfig.url}/logo.jpeg`,
+    image: `${siteConfig.url}/logo.jpeg`,
     areaServed: { "@type": "Country", name: siteConfig.country },
     address: {
       "@type": "PostalAddress",
