@@ -41,9 +41,15 @@ const CONTROL_CHARS_KEEP_NEWLINES =
   /[\x00-\x09\x0B\x0C\x0E-\x1F\x7F-\x9F]/g;
 const CONTROL_CHARS_ALL = /[\x00-\x1F\x7F-\x9F]/g;
 
-// Zero-width and bidirectional-override characters used to spoof text.
-const INVISIBLE_CHARS =
-  /[​-‏‪-‮⁠-⁤﻿]/g;
+// Zero-width and bidi-override characters used to spoof text.
+//
+// Written as escapes on purpose: the previous version held the literal
+// invisible characters, which are impossible to review in a diff.
+//
+// U+200C (ZWNJ), U+200D (ZWJ) and U+200E/U+200F (LRM/RLM) are deliberately
+// NOT stripped - they carry meaning in Arabic and Persian, and removing them
+// mangles right-to-left text. Only the spoofing vectors are removed.
+const INVISIBLE_CHARS = /[\u200B\u202A-\u202E\u2060-\u2064\uFEFF]/g;
 
 /**
  * Strips control characters, normalises whitespace and enforces a maximum

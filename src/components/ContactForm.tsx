@@ -1,14 +1,43 @@
 "use client";
 
-import { useActionState, useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Icon } from "@/components/icons";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { websiteTypeOptions } from "@/config/services";
-import { siteConfig, whatsAppLink } from "@/config/site";
-import { submitEnquiry } from "@/lib/actions/contact";
-import { initialContactState, type ContactState } from "@/lib/contact-state";
-import type { ContactField } from "@/lib/validation";
+import {
+  WEB3FORMS_ACCESS_KEY,
+  WEB3FORMS_ENDPOINT,
+  siteConfig,
+  whatsAppLink,
+} from "@/config/site";
+import {
+  readContactForm,
+  validateContact,
+  type ContactField,
+  type FieldErrors,
+} from "@/lib/validation";
 import { cn } from "@/lib/utils";
+
+/**
+ * -----------------------------------------------------------------------------
+ * CONTACT FORM
+ *
+ * Submits straight from the browser to Web3Forms, which is the way Web3Forms
+ * is designed to be used: the access key is public, and posting from the page
+ * avoids relaying through our own server.
+ *
+ * It previously posted server-side from a Next.js server action, and that was
+ * failing in production ("Your message could not be sent"). Relaying through a
+ * shared datacentre IP is the likely reason — it is exactly the traffic a form
+ * service filters — and it added a hop that could fail without us seeing why.
+ * Going direct removes that whole failure mode.
+ *
+ * Validation still runs before anything is sent, using the same rules the
+ * server action used (src/lib/validation.ts).
+ * -----------------------------------------------------------------------------
+ */
+
+type Status = "idle" | "sending" | "success" | "error";
 
 const INPUT_CLASS =
   "w-full rounded-lg border border-line bg-white px-4 py-3 text-[0.9375rem] text-ink " +
@@ -50,113 +79,125 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
-/** Result banner shown after a submission attempt. */
-function ResultPanel({ state }: { state: ContactState }) {
-  if (state.status === "idle" || state.status === "invalid") return null;
-
-  if (state.status === "success") {
-    return (
-      <div className="rounded-card border border-line bg-white p-6 sm:p-8">
-        <span className="grid size-11 place-items-center rounded-full bg-ink text-white">
-          <Icon name="check" className="size-5" strokeWidth={2.5} />
-        </span>
-        <h3 className="mt-5 text-xl font-bold tracking-[-0.015em] text-ink">
-          Request sent
-        </h3>
-        <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted">
-          {state.message}
-        </p>
-      </div>
-    );
-  }
-
-  // Delivery failed. Give the visitor a route that still works rather than a
-  // dead end - this panel is only ever reached when sending actually fails.
-  return (
-    <div className="rounded-card border border-accent/35 bg-accent-soft/60 p-6 sm:p-8">
-      <h3 className="text-lg font-bold tracking-[-0.015em] text-ink">
-        Your message could not be sent
-      </h3>
-      <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted">
-        {state.message}
-      </p>
-
-      <div className="mt-5 flex flex-wrap gap-3">
-        <ButtonLink href={whatsAppLink()} size="sm">
-          <Icon name="whatsapp" className="size-4" />
-          Send on WhatsApp
-        </ButtonLink>
-
-        {siteConfig.isEmailConfigured ? (
-          <ButtonLink
-            href={`mailto:${siteConfig.email}?subject=${encodeURIComponent(
-              "Website enquiry",
-            )}`}
-            size="sm"
-            variant="outline"
-          >
-            <Icon name="mail" className="size-4" />
-            Email us
-          </ButtonLink>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
 export function ContactForm() {
-  const [state, formAction, isPending] = useActionState(
-    submitEnquiry,
-    initialContactState,
-  );
+  const [status, setStatus] = useState<Status>("idle");
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [summary, setSummary] = useState("");
+
   const formId = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
   // Lets a "Request a restaurant website" link pre-select the dropdown via
-  // ?type=Restaurant.
-  //
-  // The select is uncontrolled, so this syncs the DOM directly instead of
-  // going through state: it keeps the form fully server-rendered (no Suspense
-  // boundary, no empty HTML for crawlers or no-JS visitors) and avoids an
-  // extra render pass.
+  // ?type=Restaurant. The select is uncontrolled, so this syncs the DOM
+  // directly rather than going through state.
   const websiteTypeRef = useRef<HTMLSelectElement>(null);
   useEffect(() => {
     const select = websiteTypeRef.current;
     if (!select || select.value) return;
 
     const requested = new URLSearchParams(window.location.search).get("type");
-    if (requested && (websiteTypeOptions as readonly string[]).includes(requested)) {
+    if (
+      requested &&
+      (websiteTypeOptions as readonly string[]).includes(requested)
+    ) {
       select.value = requested;
     }
   }, []);
 
-  // After a submission, move attention to the outcome: the first invalid field
-  // on failure, or the result panel on success.
+  // Move attention to the outcome once it renders.
   useEffect(() => {
-    if (state.status === "idle" || state.token === 0) return;
+    if (status === "success" || status === "error") resultRef.current?.focus();
+  }, [status]);
 
-    if (state.status === "invalid") {
-      const firstInvalid = Object.keys(state.errors)[0] as
-        | ContactField
-        | undefined;
-      if (firstInvalid) {
-        formRef.current
-          ?.querySelector<HTMLElement>(`[name="${firstInvalid}"]`)
-          ?.focus();
-      }
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    // Captured now: `event.currentTarget` is null again after the first await.
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    // Honeypot — a hidden field people never see. Bots that fill it get a
+    // normal-looking response and nothing is sent.
+    if (formData.get("hp_url")) {
+      form.reset();
+      setErrors({});
+      setSummary("");
+      setStatus("success");
       return;
     }
 
-    resultRef.current?.focus();
-  }, [state.status, state.errors, state.token]);
+    const values = readContactForm(formData);
+    const fieldErrors = validateContact(values);
+
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors);
+      setSummary("Please check the highlighted fields and try again.");
+      setStatus("idle");
+
+      const firstInvalid = Object.keys(fieldErrors)[0];
+      form.querySelector<HTMLElement>(`[name="${firstInvalid}"]`)?.focus();
+      return;
+    }
+
+    setErrors({});
+    setSummary("");
+    setStatus("sending");
+
+    try {
+      const response = await fetch(WEB3FORMS_ENDPOINT, {
+        method: "POST",
+        headers: {
+          // charset is explicit so non-Latin input (Arabic, for example) is
+          // transmitted and decoded as UTF-8 rather than being mangled.
+          "Content-Type": "application/json; charset=utf-8",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: `New website request – ${values.fullName}`,
+          from_name: "Webzivo Website",
+          // Lets you hit reply in your inbox and reach the enquirer directly.
+          replyto: values.email,
+          // These keys become the field labels in the email, so they are
+          // written the way they should read in the inbox.
+          "Full Name": values.fullName,
+          "Business Name": values.businessName || "—",
+          "Business Type": values.businessType || "—",
+          Email: values.email,
+          "Phone / WhatsApp": values.phone || "—",
+          "Website Type": values.websiteType,
+          "Project Details": values.message,
+        }),
+      });
+
+      // Web3Forms answers 200 with { success: false } for rejected
+      // submissions, so the status code alone is not proof of delivery.
+      const result = (await response.json().catch(() => null)) as {
+        success?: boolean;
+        message?: string;
+      } | null;
+
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.message ?? `HTTP ${response.status}`);
+      }
+
+      form.reset();
+      setStatus("success");
+    } catch (error) {
+      console.error("[contact] Submission failed:", error);
+      setStatus("error");
+    }
+  }
 
   const errorId = (field: ContactField) => `${formId}-${field}-error`;
   const fieldId = (field: ContactField) => `${formId}-${field}`;
   const describedBy = (field: ContactField) =>
-    state.errors[field] ? errorId(field) : undefined;
+    errors[field] ? errorId(field) : undefined;
 
-  if (state.status === "success") {
+  const isSending = status === "sending";
+
+  if (status === "success") {
     return (
       <div
         ref={resultRef}
@@ -165,14 +206,24 @@ export function ContactForm() {
         aria-live="polite"
         className="outline-none"
       >
-        <ResultPanel state={state} />
+        <div className="rounded-card border border-line bg-white p-6 sm:p-8">
+          <span className="grid size-11 place-items-center rounded-full bg-ink text-white">
+            <Icon name="check" className="size-5" strokeWidth={2.5} />
+          </span>
+          <h3 className="mt-5 text-xl font-bold tracking-[-0.015em] text-ink">
+            Request sent
+          </h3>
+          <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted">
+            Thanks! We&apos;ve received your request and will reply soon.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <div>
-      {/* Announces the outcome of a submission to screen readers. */}
+      {/* Only shown when sending genuinely failed. */}
       <div
         ref={resultRef}
         tabIndex={-1}
@@ -180,16 +231,50 @@ export function ContactForm() {
         aria-live="polite"
         className="outline-none empty:hidden"
       >
-        {state.status !== "idle" && state.status !== "invalid" ? (
-          <div className="mb-6">
-            <ResultPanel state={state} />
+        {status === "error" ? (
+          <div className="mb-6 rounded-card border border-accent/35 bg-accent-soft/60 p-6 sm:p-8">
+            <h3 className="text-lg font-bold tracking-[-0.015em] text-ink">
+              Your message could not be sent
+            </h3>
+            <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted">
+              Something went wrong on the way to our inbox. Please try again, or
+              reach us directly using one of the options below.
+            </p>
+
+            <div className="mt-5 flex flex-wrap gap-3">
+              <ButtonLink href={whatsAppLink()} size="sm">
+                <Icon name="whatsapp" className="size-4" />
+                Send on WhatsApp
+              </ButtonLink>
+
+              {siteConfig.isEmailConfigured ? (
+                <ButtonLink
+                  href={`mailto:${siteConfig.email}?subject=${encodeURIComponent(
+                    "Website enquiry",
+                  )}`}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Icon name="mail" className="size-4" />
+                  Email us
+                </ButtonLink>
+              ) : null}
+            </div>
           </div>
         ) : null}
       </div>
 
-      <form ref={formRef} action={formAction} noValidate className="space-y-5">
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        noValidate
+        className="space-y-5"
+      >
         {/* Honeypot - hidden from people, irresistible to bots. */}
-        <div aria-hidden="true" className="absolute left-[-9999px] top-0 h-0 w-0 overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="absolute left-[-9999px] top-0 h-0 w-0 overflow-hidden"
+        >
           <label htmlFor={`${formId}-hp`}>Do not fill this in</label>
           <input
             id={`${formId}-hp`}
@@ -212,19 +297,12 @@ export function ContactForm() {
               required
               autoComplete="name"
               maxLength={100}
-              defaultValue={state.values?.fullName ?? ""}
-              aria-invalid={Boolean(state.errors.fullName)}
+              aria-invalid={Boolean(errors.fullName)}
               aria-describedby={describedBy("fullName")}
               placeholder="Your name"
-              className={cn(
-                INPUT_CLASS,
-                state.errors.fullName && "border-[#b3261e]",
-              )}
+              className={cn(INPUT_CLASS, errors.fullName && "border-[#b3261e]")}
             />
-            <FieldError
-              id={errorId("fullName")}
-              message={state.errors.fullName}
-            />
+            <FieldError id={errorId("fullName")} message={errors.fullName} />
           </div>
 
           <div>
@@ -235,7 +313,6 @@ export function ContactForm() {
               type="text"
               autoComplete="organization"
               maxLength={120}
-              defaultValue={state.values?.businessName ?? ""}
               placeholder="e.g. Maida Restaurant"
               className={INPUT_CLASS}
             />
@@ -248,7 +325,6 @@ export function ContactForm() {
               name="businessType"
               type="text"
               maxLength={120}
-              defaultValue={state.values?.businessType ?? ""}
               placeholder="e.g. Italian restaurant, barber shop"
               className={INPUT_CLASS}
             />
@@ -265,16 +341,12 @@ export function ContactForm() {
               required
               autoComplete="email"
               maxLength={254}
-              defaultValue={state.values?.email ?? ""}
-              aria-invalid={Boolean(state.errors.email)}
+              aria-invalid={Boolean(errors.email)}
               aria-describedby={describedBy("email")}
               placeholder="you@example.com"
-              className={cn(
-                INPUT_CLASS,
-                state.errors.email && "border-[#b3261e]",
-              )}
+              className={cn(INPUT_CLASS, errors.email && "border-[#b3261e]")}
             />
-            <FieldError id={errorId("email")} message={state.errors.email} />
+            <FieldError id={errorId("email")} message={errors.email} />
           </div>
 
           <div>
@@ -286,16 +358,12 @@ export function ContactForm() {
               autoComplete="tel"
               inputMode="tel"
               maxLength={40}
-              defaultValue={state.values?.phone ?? ""}
-              aria-invalid={Boolean(state.errors.phone)}
+              aria-invalid={Boolean(errors.phone)}
               aria-describedby={describedBy("phone")}
               placeholder="+965 0000 0000"
-              className={cn(
-                INPUT_CLASS,
-                state.errors.phone && "border-[#b3261e]",
-              )}
+              className={cn(INPUT_CLASS, errors.phone && "border-[#b3261e]")}
             />
-            <FieldError id={errorId("phone")} message={state.errors.phone} />
+            <FieldError id={errorId("phone")} message={errors.phone} />
           </div>
 
           <div>
@@ -308,15 +376,15 @@ export function ContactForm() {
                 name="websiteType"
                 ref={websiteTypeRef}
                 required
-                defaultValue={state.values?.websiteType ?? ""}
-                aria-invalid={Boolean(state.errors.websiteType)}
+                defaultValue=""
+                aria-invalid={Boolean(errors.websiteType)}
                 aria-describedby={describedBy("websiteType")}
                 className={cn(
                   INPUT_CLASS,
                   "appearance-none pr-11 text-ink",
                   // Greys the text out while the placeholder option is selected.
                   "[&:has(option[value='']:checked)]:text-muted",
-                  state.errors.websiteType && "border-[#b3261e]",
+                  errors.websiteType && "border-[#b3261e]",
                 )}
               >
                 <option value="" disabled>
@@ -335,7 +403,7 @@ export function ContactForm() {
             </div>
             <FieldError
               id={errorId("websiteType")}
-              message={state.errors.websiteType}
+              message={errors.websiteType}
             />
           </div>
         </div>
@@ -350,32 +418,31 @@ export function ContactForm() {
             required
             rows={5}
             maxLength={4000}
-            defaultValue={state.values?.message ?? ""}
-            aria-invalid={Boolean(state.errors.message)}
+            aria-invalid={Boolean(errors.message)}
             aria-describedby={describedBy("message")}
             placeholder="What does your business do, and what do you want the website to achieve?"
             className={cn(
               INPUT_CLASS,
               "resize-y",
-              state.errors.message && "border-[#b3261e]",
+              errors.message && "border-[#b3261e]",
             )}
           />
-          <FieldError id={errorId("message")} message={state.errors.message} />
+          <FieldError id={errorId("message")} message={errors.message} />
         </div>
 
-        {state.status === "invalid" ? (
-          <p className="text-sm font-medium text-[#b3261e]">{state.message}</p>
+        {summary ? (
+          <p className="text-sm font-medium text-[#b3261e]">{summary}</p>
         ) : null}
 
         <div className="flex flex-col gap-4 pt-1 sm:flex-row sm:items-center sm:justify-between">
           <Button
             type="submit"
             size="lg"
-            disabled={isPending}
-            withArrow={!isPending}
+            disabled={isSending}
+            withArrow={!isSending}
             className="w-full sm:w-auto"
           >
-            {isPending ? (
+            {isSending ? (
               <>
                 <span
                   aria-hidden="true"
@@ -389,7 +456,8 @@ export function ContactForm() {
           </Button>
 
           <p className="text-[13px] leading-relaxed text-muted">
-            Fields marked <span className="text-accent-text">*</span> are required.
+            Fields marked <span className="text-accent-text">*</span> are
+            required.
           </p>
         </div>
       </form>
