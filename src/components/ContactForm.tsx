@@ -70,32 +70,21 @@ function ResultPanel({ state }: { state: ContactState }) {
     );
   }
 
-  // Not connected to an inbox yet, or delivery failed: give the visitor a
-  // route that actually works rather than a dead end.
-  const isUnconfigured = state.status === "unconfigured";
-
+  // Delivery failed. Give the visitor a route that still works rather than a
+  // dead end - this panel is only ever reached when sending actually fails.
   return (
     <div className="rounded-card border border-accent/35 bg-accent-soft/60 p-6 sm:p-8">
       <h3 className="text-lg font-bold tracking-[-0.015em] text-ink">
-        {isUnconfigured
-          ? "Your message was not sent"
-          : "Your message could not be sent"}
+        Your message could not be sent
       </h3>
       <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted">
-        {state.message}{" "}
-        {isUnconfigured
-          ? "Please send your enquiry using one of the options below - we will get it straight away."
-          : "Please try again, or use one of the options below."}
+        {state.message}
       </p>
 
       <div className="mt-5 flex flex-wrap gap-3">
         <ButtonLink href={whatsAppLink()} size="sm">
-          {siteConfig.isWhatsAppConfigured ? (
-            <Icon name="whatsapp" className="size-4" />
-          ) : null}
-          {siteConfig.isWhatsAppConfigured
-            ? "Send on WhatsApp"
-            : "Contact options"}
+          <Icon name="whatsapp" className="size-4" />
+          Send on WhatsApp
         </ButtonLink>
 
         {siteConfig.isEmailConfigured ? (
@@ -111,18 +100,6 @@ function ResultPanel({ state }: { state: ContactState }) {
           </ButtonLink>
         ) : null}
       </div>
-
-      {process.env.NODE_ENV === "development" && isUnconfigured ? (
-        <p className="mt-5 border-t border-accent/25 pt-4 text-[13px] leading-relaxed text-muted">
-          <strong className="font-semibold text-ink">Dev note:</strong> to
-          receive these enquiries by email, set{" "}
-          <code className="font-mono">RESEND_API_KEY</code>,{" "}
-          <code className="font-mono">CONTACT_FROM_EMAIL</code> and{" "}
-          <code className="font-mono">CONTACT_TO_EMAIL</code> in{" "}
-          <code className="font-mono">.env.local</code>. See{" "}
-          <code className="font-mono">src/lib/email.ts</code>.
-        </p>
-      ) : null}
     </div>
   );
 }

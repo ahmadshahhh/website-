@@ -25,26 +25,22 @@ function env(value: string | undefined): string {
 
 /**
  * Production URL. Used for canonical links, sitemap.xml, robots.txt and
- * Open Graph tags. Falls back to localhost so local development still works —
- * set NEXT_PUBLIC_SITE_URL before deploying or share links will be wrong.
+ * Open Graph tags. Defaults to the live Vercel domain; override with
+ * NEXT_PUBLIC_SITE_URL once a custom domain replaces it.
  */
 export const SITE_URL =
   env(process.env.NEXT_PUBLIC_SITE_URL).replace(/\/$/, "") ||
-  "http://localhost:3000";
+  "https://webzivo-kw.vercel.app";
 
 /**
  * WhatsApp number in E.164 form: country code + national number, digits only,
  * and NO leading zero on the national part.
  *
- * The owner's number is written locally as 0323 9713406 with country code +92.
- * That leading 0 is a national trunk prefix and must be dropped when dialling
- * internationally, so the value below is 92 followed by 3239713406 — writing
- * it as 920323… would produce a wa.me link that does not resolve.
- *
- * Committed here so the button works everywhere without setup. Set
- * NEXT_PUBLIC_WHATSAPP_NUMBER to override it for a specific deployment.
+ * Kuwait's country code is 965, so the local number 9498 6039 becomes
+ * 96594986039. Committed here so the button works everywhere without setup;
+ * set NEXT_PUBLIC_WHATSAPP_NUMBER to override it for a specific deployment.
  */
-const DEFAULT_WHATSAPP_NUMBER = "923239713406";
+const DEFAULT_WHATSAPP_NUMBER = "96594986039";
 
 const WHATSAPP_NUMBER =
   env(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER).replace(/[^\d]/g, "") ||
@@ -55,7 +51,7 @@ export const isWhatsAppConfigured =
   WHATSAPP_NUMBER.length >= 8 && WHATSAPP_NUMBER.length <= 15;
 
 /**
- * Human-readable version of the number, e.g. +92 323 971 3406. Used only as a
+ * Human-readable version of the number, e.g. +965 9498 6039. Used only as a
  * visible label — every link is built from the raw digits above.
  */
 function formatPhone(digits: string): string {
@@ -93,14 +89,33 @@ export const CONTACT_EMAIL =
   env(process.env.NEXT_PUBLIC_CONTACT_EMAIL) || DEFAULT_CONTACT_EMAIL;
 export const isEmailConfigured = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(CONTACT_EMAIL);
 
-const MAPS_URL = env(process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL);
+/** The Google Business listing. Opened by every "Mangaf, Kuwait" link. */
+const DEFAULT_MAPS_URL =
+  "https://www.google.com/maps/search/?api=1&query=Webzivo%20Mangaf&query_place_id=ChIJP5UXC3vw_SURw-8XOF7a4Uo";
+
+const MAPS_URL =
+  env(process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL) || DEFAULT_MAPS_URL;
+
+/**
+ * Embeddable map for the contact card. Uses the public `output=embed` form,
+ * which needs no Maps API key and therefore no billing account.
+ */
+export const MAPS_EMBED_URL =
+  "https://maps.google.com/maps?q=Webzivo%20Mangaf%2C%20Kuwait&t=&z=15&ie=UTF8&iwloc=&output=embed";
+
 /** Only trust genuine Google Maps links for the directions button. */
 export const isMapsConfigured = /^https:\/\/([\w-]+\.)*(google\.[\w.]+|goo\.gl|maps\.app\.goo\.gl)\//.test(
   MAPS_URL,
 );
 
-/** Optional street address. When blank the site shows only "Kuwait". */
+/** Optional street address. When blank the site shows only the area below. */
 export const BUSINESS_ADDRESS = env(process.env.NEXT_PUBLIC_BUSINESS_ADDRESS);
+
+/** How the location reads everywhere it appears: footer, about, contact. */
+export const LOCATION_LABEL = "Mangaf, Kuwait";
+
+/** Domain shown in the demo mockups' browser chrome. */
+export const DISPLAY_DOMAIN = SITE_URL.replace(/^https?:\/\//, "");
 
 /** Pre-filled message used by every WhatsApp link on the site. */
 export const WHATSAPP_MESSAGE =
@@ -127,6 +142,10 @@ export const siteConfig = {
   locale: "en",
   country: "Kuwait",
   countryCode: "KW",
+  /** Area + country, linked to the Google Maps listing wherever it appears. */
+  locationLabel: LOCATION_LABEL,
+  mapsEmbedUrl: MAPS_EMBED_URL,
+  displayDomain: DISPLAY_DOMAIN,
   /** Shown in the hero as a small trust / location line. */
   heroEyebrow: "Website Design & Development • Kuwait",
   email: CONTACT_EMAIL,

@@ -102,7 +102,7 @@ export function Hero() {
           <Reveal delay={200} className="relative min-w-0">
             {/* Extra right padding on large screens leaves room for the phone. */}
             <div className="relative mx-auto max-w-xl lg:mr-0 lg:max-w-none lg:pl-20">
-              <BrowserFrame url="webzivo.com/work/restaurant-demo">
+              <BrowserFrame url={`${siteConfig.displayDomain}/work/restaurant-demo`}>
                 <div className="aspect-[16/11]">
                   <SitePreview variant="restaurant" />
                 </div>

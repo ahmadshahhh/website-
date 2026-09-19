@@ -3,6 +3,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import { Eyebrow, Section } from "@/components/ui/Section";
 import { siteConfig } from "@/config/site";
+import { LocationLink } from "@/components/ui/LocationLink";
 
 const FOCUS = [
   "Designs built around your business, not a stock template",
@@ -80,8 +81,10 @@ export function About() {
               </span>
 
               <p className="eyebrow mt-7 text-muted">Based in</p>
-              <p className="display mt-2 text-[2.2rem] text-ink">
-                {siteConfig.country}
+              {/* Slightly smaller than a section heading so the two-part
+                  label stays on one line on narrow screens. */}
+              <p className="display mt-2 text-[1.75rem] text-ink sm:text-[2.1rem]">
+                <LocationLink />
               </p>
 
               {siteConfig.address ? (

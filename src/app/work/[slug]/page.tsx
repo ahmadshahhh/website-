@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Reveal } from "@/components/ui/Reveal";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { getProject, projects } from "@/config/projects";
+import { siteConfig } from "@/config/site";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -93,7 +94,7 @@ export default async function ProjectPage({ params }: Params) {
       {/* Preview */}
       <Section bordered={false} className="pb-0 pt-12 sm:pt-16">
         <Reveal>
-          <BrowserFrame url={`webzivo.com/work/${previewUrl(project.preview)}`}>
+          <BrowserFrame url={`${siteConfig.displayDomain}/work/${previewUrl(project.preview)}`}>
             <div className="relative aspect-[16/11]">
               {project.image ? (
                 <Image

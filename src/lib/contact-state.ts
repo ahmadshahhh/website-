@@ -9,10 +9,8 @@ import type { ContactValues, FieldErrors } from "@/lib/validation";
  */
 export type ContactStatus =
   | "idle"
-  /** Validated and delivered to the configured inbox. */
+  /** Validated and delivered to the inbox. */
   | "success"
-  /** Validated, but no email provider is connected yet. */
-  | "unconfigured"
   /** Validation failed - see `errors`. */
   | "invalid"
   /** Something went wrong server-side, or the rate limit was hit. */

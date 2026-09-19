@@ -45,8 +45,9 @@ Other commands:
 | `npm run lint` | ESLint |
 | `npm run check` | Typecheck + lint + build, all in one |
 
-> The site runs fine before you configure anything. Details you haven't provided
-> are simply not displayed, rather than shown as placeholder text to visitors.
+> The site runs correctly with no `.env` file at all — the WhatsApp number,
+> email, Maps listing, site URL and contact form all have working defaults
+> committed in `src/config/site.ts`.
 
 ---
 
@@ -63,27 +64,23 @@ cp .env.example .env.local
 
 ### 📱 WhatsApp number
 
-Already set to **+92 323 971 3406** (`923239713406`), committed as
+Already set to **+965 9498 6039** (`96594986039`), committed as
 `DEFAULT_WHATSAPP_NUMBER` in `src/config/site.ts`. Override it per deployment with:
 
 ```bash
-NEXT_PUBLIC_WHATSAPP_NUMBER=923239713406
+NEXT_PUBLIC_WHATSAPP_NUMBER=96594986039
 ```
 
-Digits only — no `+`, no spaces, no dashes — and **drop the leading `0`** from the
-national part. That last point is the usual mistake: `+92 0323 9713406` written
-out as `9203239713406` produces a `wa.me` link that will not open. The correct
-value is `92` + `3239713406`.
+Digits only — no `+`, no spaces, no dashes — and **drop the leading `0`** from
+the national part. Kuwait's code is 965, so `9498 6039` becomes `96594986039`.
 
-This one value powers the floating WhatsApp button, the contact section and the
-footer. Every WhatsApp link opens with this message pre-filled:
+This one value powers the floating WhatsApp button, the contact card, the
+pricing section, the final call to action and the footer. Every WhatsApp link
+opens with this message pre-filled:
 
 > "Hello Webzivo, I am interested in building a website for my business."
 
 To change that wording, edit `WHATSAPP_MESSAGE` in `src/config/site.ts`.
-
-If the number is ever cleared, the floating button falls back to the contact form
-rather than opening a broken `wa.me` link. That is deliberate.
 
 ### ✉️ Email address
 
@@ -127,69 +124,68 @@ that before committing. The script assumes dark artwork on a flat light
 background; for a different arrangement, adjust the crops in
 `src/components/ui/Logo.tsx` instead.
 
-### 📍 Google Maps link
-
-```bash
-NEXT_PUBLIC_GOOGLE_MAPS_URL=https://maps.app.goo.gl/your-link
-NEXT_PUBLIC_BUSINESS_ADDRESS=Salmiya, Block 12          # optional
-```
-
-Get the link from your Google Business Profile → Share. The **"Get Directions"**
-and **"Open in Google Maps"** buttons only appear once a valid Google Maps URL is
-present, so there is never a dead button on the page.
-
-Leave `NEXT_PUBLIC_BUSINESS_ADDRESS` blank to show only "Kuwait".
-
 ### 🌐 Your domain
+
+Already set to **https://webzivo-kw.vercel.app**. Override it once a custom
+domain replaces the Vercel one:
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://webzivo.com
 ```
 
-**Set this before going live.** It is used for canonical URLs, `sitemap.xml`,
-`robots.txt` and the social share card. Without it those fall back to
-`localhost:3000`, which breaks SEO and link previews.
+This drives canonical URLs, `sitemap.xml`, `robots.txt` and the social share
+image, and it is also the domain shown in the demo mockups' browser bars — so
+they always match the real address.
+
+### 📍 Location
+
+"Mangaf, Kuwait" appears in the footer, the about section and the contact card,
+and every instance links to the Google Maps listing. All three read from
+`LOCATION_LABEL` and `NEXT_PUBLIC_GOOGLE_MAPS_URL` in `src/config/site.ts`, so
+changing it once updates them together.
+
+The contact card also embeds a map. It uses Google's keyless `output=embed`
+form, so there is no Maps API key or billing account to set up.
+
+To show a street address above the location, set:
+
+```bash
+NEXT_PUBLIC_BUSINESS_ADDRESS=Block 4, Street 12
+```
 
 ---
 
 ## Receive contact form enquiries
 
-The contact form validates and sanitises every submission on the server, but it
-will **not send email until you connect a provider**. Until then it tells the
-visitor plainly that the message was not sent and points them at WhatsApp and
-email instead — nothing is silently dropped, and nothing pretends to have sent.
+The contact form is connected to [Web3Forms](https://web3forms.com), which
+emails every submission to **webzivodesignz@gmail.com**. It works out of the
+box — no setup required.
 
-The default provider is [Resend](https://resend.com) (free tier available):
-
-1. Create an account and verify the domain you want to send from.
-2. Create an API key.
-3. Add to `.env.local`:
+**Web3Forms decides the destination from the access key itself**; there is no
+"send to" field in its API. To change where enquiries land, create a new key at
+web3forms.com using that address and set:
 
 ```bash
-RESEND_API_KEY=re_xxxxxxxxxxxx
-CONTACT_FROM_EMAIL=website@webzivo.com   # must be on your verified domain
-CONTACT_TO_EMAIL=you@webzivo.com         # where enquiries land
+WEB3FORMS_ACCESS_KEY=your-new-key
 ```
 
-4. Restart the dev server, or redeploy.
+The request is made from the server, not the browser. Web3Forms keys are
+designed to be public, but posting server-side means every submission passes
+through this app's validation, sanitisation, honeypot and rate limiting first,
+instead of being postable straight from a browser console.
 
-Note that `CONTACT_FROM_EMAIL` must be on a domain you own and have verified with
-the provider. A Gmail address cannot be used to *send* from — but enquiries can
-still be *delivered* to `webzivodesignz@gmail.com`, which is the default when
-`CONTACT_TO_EMAIL` is blank.
-
-**Using a different provider** (SendGrid, Postmark, Mailgun, SMTP…)? Replace the
-single `fetch` call in `deliver()` inside **`src/lib/email.ts`**. Validation, rate
-limiting, spam protection and all the UI states stay exactly as they are.
-
-These variables have no `NEXT_PUBLIC_` prefix, so your API key is only ever read
-on the server and never reaches the browser.
+**Using a different provider** (Resend, SendGrid, Postmark, SMTP…)? Replace the
+`fetch` call in **`src/lib/email.ts`**. Validation, rate limiting, spam
+protection and all the UI states stay exactly as they are.
 
 **What's already handled:** required-field validation, email and phone format
 checks, length limits, control-character and email-header-injection stripping, a
 honeypot field for bots, and a basic per-IP rate limit (5 submissions per minute).
 The rate limit lives in server memory, so for a high-traffic site move it to a
 shared store such as Upstash Redis.
+
+If a submission ever fails to send, the form says so and offers WhatsApp and
+email instead, so a visitor is never left with nowhere to go.
 
 ---
 
@@ -288,11 +284,11 @@ environment variables on the host — they are not read from `.env.local` in pro
 
 ## Before you publish
 
-- [ ] `NEXT_PUBLIC_SITE_URL` set to your real domain
-- [x] WhatsApp number set to +92 323 971 3406 — **click the floating button and confirm it opens your chat**
+- [x] Site URL set to https://webzivo-kw.vercel.app (update if you buy a custom domain)
+- [x] WhatsApp number set to +965 9498 6039 — **click the floating button and confirm it opens your chat**
 - [x] Contact email set to webzivodesignz@gmail.com
-- [ ] Contact form connected to an email provider, and **a test submission received**
-- [ ] `NEXT_PUBLIC_GOOGLE_MAPS_URL` added (or accept that the directions buttons stay hidden)
+- [ ] **Send a test submission through the live form and confirm it reaches your inbox**
+- [x] Google Maps listing linked from every location label, and embedded in the contact card
 - [ ] Review the About and FAQ copy — adjust anything that doesn't match how you work
 - [ ] Decide what to do about the six demo projects: keep them labelled as demos, or replace them
 - [ ] Add real social links to `socials` in `src/config/site.ts` (empty by default — no fake accounts)
