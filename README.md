@@ -157,35 +157,38 @@ NEXT_PUBLIC_BUSINESS_ADDRESS=Block 4, Street 12
 
 ## Receive contact form enquiries
 
-The contact form is connected to [Web3Forms](https://web3forms.com), which
-emails every submission to **webzivodesignz@gmail.com**. It works out of the
-box — no setup required.
+The contact form posts **from the browser straight to [Web3Forms](https://web3forms.com)**,
+which emails every submission to **webzivodesignz@gmail.com**. It works out of
+the box — no setup required.
 
 **Web3Forms decides the destination from the access key itself**; there is no
 "send to" field in its API. To change where enquiries land, create a new key at
 web3forms.com using that address and set:
 
 ```bash
-WEB3FORMS_ACCESS_KEY=your-new-key
+NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY=your-new-key
 ```
 
-The request is made from the server, not the browser. Web3Forms keys are
-designed to be public, but posting server-side means every submission passes
-through this app's validation, sanitisation, honeypot and rate limiting first,
-instead of being postable straight from a browser console.
+`NEXT_PUBLIC_` is correct: Web3Forms keys are public by design — they live in
+the page that submits the form, and the key alone only lets someone send mail
+to the inbox it is already registered to.
 
-**Using a different provider** (Resend, SendGrid, Postmark, SMTP…)? Replace the
-`fetch` call in **`src/lib/email.ts`**. Validation, rate limiting, spam
-protection and all the UI states stay exactly as they are.
+> **Why not post from the server?** It used to, and it failed in production.
+> Relaying through a shared datacentre IP is exactly the traffic a form service
+> filters, and it added a hop that could fail silently. Posting direct is the
+> documented Web3Forms usage and removes that failure mode.
 
 **What's already handled:** required-field validation, email and phone format
-checks, length limits, control-character and email-header-injection stripping, a
-honeypot field for bots, and a basic per-IP rate limit (5 submissions per minute).
-The rate limit lives in server memory, so for a high-traffic site move it to a
-shared store such as Upstash Redis.
+checks, length limits, control-character and email-header-injection stripping,
+a honeypot field for bots, a disabled submit button that prevents
+double-submits, and UTF-8 so Arabic and other non-Latin input arrives intact.
 
-If a submission ever fails to send, the form says so and offers WhatsApp and
-email instead, so a visitor is never left with nowhere to go.
+If a submission fails — network error or a non-success response — the form says
+so and offers WhatsApp and email instead, so a visitor is never stuck.
+
+**Using a different provider?** Replace the `fetch` call in `handleSubmit`
+inside `src/components/ContactForm.tsx`. Validation and the UI states stay as
+they are.
 
 ---
 
