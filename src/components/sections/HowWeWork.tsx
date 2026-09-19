@@ -39,13 +39,6 @@ const COMMITMENTS: {
   },
 ];
 
-const NEXT_STEPS = [
-  "Free consultation",
-  "Agreement and design",
-  "Build and revisions",
-  "Launch and ongoing support",
-];
-
 export function HowWeWork() {
   return (
     <Section id="how-we-work" tone="light">
@@ -76,31 +69,6 @@ export function HowWeWork() {
           </li>
         ))}
       </ul>
-
-      {/* What happens next */}
-      <Reveal delay={120}>
-        <div className="mt-6 rounded-card border border-line bg-paper-soft p-7 sm:p-8">
-          <h3 className="text-lg font-bold tracking-[-0.015em] text-ink">
-            What happens next
-          </h3>
-
-          <ol className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {NEXT_STEPS.map((step, index) => (
-              <li key={step} className="flex items-start gap-3">
-                <span
-                  aria-hidden="true"
-                  className="grid size-7 shrink-0 place-items-center rounded-full border border-line bg-white font-mono text-xs font-medium text-ink"
-                >
-                  {index + 1}
-                </span>
-                <span className="text-[0.9375rem] leading-relaxed text-muted">
-                  {step}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </Reveal>
     </Section>
   );
 }
