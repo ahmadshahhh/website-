@@ -15,8 +15,13 @@ export const navItems: NavItem[] = [
   { label: "Contact", href: "/#contact", isAnchor: true },
 ];
 
-/** The single primary conversion action, reused across the site. */
+/**
+ * The single primary conversion action, reused across the site.
+ *
+ * It points at the contact section, which holds both the form and the direct
+ * WhatsApp/email options, so the same label works wherever it appears.
+ */
 export const primaryCta = {
-  label: "Get Your Website",
+  label: "Get Your Free Consultation",
   href: "/#contact",
 } as const;

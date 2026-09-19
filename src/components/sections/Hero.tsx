@@ -5,6 +5,7 @@ import { SitePreview } from "@/components/previews/SitePreview";
 import { ButtonLink } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
+import { primaryCta } from "@/config/nav";
 import { siteConfig } from "@/config/site";
 
 const HIGHLIGHTS = [
@@ -70,13 +71,21 @@ export function Hero() {
 
             <Reveal delay={240}>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <ButtonLink href="/#contact" size="lg" withArrow>
-                  Get Your Website
+                {/* Anchors to #contact, which holds both the form and the
+                    direct WhatsApp/email options. html has scroll-behavior:
+                    smooth, so this glides rather than jumps. */}
+                <ButtonLink href={primaryCta.href} size="lg" withArrow>
+                  {primaryCta.label}
                 </ButtonLink>
                 <ButtonLink href="/work" size="lg" variant="outline">
                   View Our Work
                 </ButtonLink>
               </div>
+
+              <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
+                Tell us about your business and we&apos;ll explain what your
+                website could include.
+              </p>
             </Reveal>
 
             <Reveal delay={320}>

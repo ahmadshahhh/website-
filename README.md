@@ -204,9 +204,37 @@ components to change what the site says.
 | --- | --- |
 | `src/config/site.ts` | Business name, tagline, description, country, social links |
 | `src/config/nav.ts` | Navigation items and the main call-to-action |
+| `src/config/capabilities.ts` | Kuwait positioning copy and the capability grid |
+| `src/config/why-website.ts` | The "why your business needs a website" cards |
 | `src/config/services.ts` | The six service cards **and** their detail pages |
 | `src/config/projects.ts` | Portfolio projects and their case-study pages |
+| `src/config/pricing.ts` | Pricing plans, prices and features |
+| `src/config/testimonials.ts` | Client testimonials (empty by default) |
 | `src/config/faq.ts` | FAQ questions and answers |
+
+### 💰 Pricing
+
+Plans live in **`src/config/pricing.ts`** — two of them, Starter from
+**25 KWD/month** and Business from **30 KWD/month**, with Business carrying the
+"Most Popular" badge.
+
+> **One price lives in two places.** The FAQ answer to "How much does a website
+> cost?" in `src/config/faq.ts` quotes the same figures. Change a price and
+> update that answer in the same commit, or the page contradicts itself.
+
+### 💬 Testimonials
+
+`src/config/testimonials.ts` ships as an **empty array**, and the section shows
+an honest "first client stories are coming soon" card instead. Add an entry and
+it switches to testimonial cards automatically:
+
+```ts
+{ quote: "…", author: "Full Name", business: "Business name" }
+```
+
+Nothing on this site invents reviews, ratings, client counts or logos. Only add
+a testimonial once a real customer has given one and agreed to it being
+published.
 
 Add an entry to any of these arrays and the card, the detail page, the navigation,
 the sitemap and the structured data all update automatically.

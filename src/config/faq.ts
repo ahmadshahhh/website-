@@ -47,7 +47,7 @@ export const faqs: FaqItem[] = [
   {
     question: "How much does a website cost?",
     answer:
-      "Websites start from 30 KD per month, which includes hosting, security, and updates. Advanced and e-commerce websites are quoted based on your needs. Contact us for a free consultation.",
+      "Websites start from 25 KWD per month on the Starter plan, or 30 KWD per month on Business. Every plan includes hosting, security and updates. Anything outside the two plans is quoted based on what you need - contact us for a free consultation.",
   },
   {
     question: "How do I get started?",
