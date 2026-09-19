@@ -12,7 +12,8 @@ const STEPS: {
     number: "01",
     icon: "chat",
     title: "Tell Us About Your Business",
-    description: "Tell us what your business does and what you need.",
+    description:
+      "Tell us what your business does and what you need. The first consultation is free.",
   },
   {
     number: "02",
@@ -32,7 +33,8 @@ const STEPS: {
     number: "04",
     icon: "rocket",
     title: "Launch",
-    description: "Your website goes live and is ready for customers.",
+    description:
+      "Your website goes live, and the monthly plan keeps it online and updated.",
   },
 ];
 
