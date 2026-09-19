@@ -162,16 +162,19 @@ which emails every submission to **webzivodesignz@gmail.com**. It works out of
 the box — no setup required.
 
 **Web3Forms decides the destination from the access key itself**; there is no
-"send to" field in its API. To change where enquiries land, create a new key at
-web3forms.com using that address and set:
+"send to" field in its API. The key lives at the top of
+**`src/components/ContactForm.tsx`**:
 
-```bash
-NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY=your-new-key
+```ts
+const WEB3FORMS_ACCESS_KEY = "e6f145bb-075e-4944-83ff-e29eb218f09c";
 ```
 
-`NEXT_PUBLIC_` is correct: Web3Forms keys are public by design — they live in
-the page that submits the form, and the key alone only lets someone send mail
-to the inbox it is already registered to.
+To change where enquiries land, create a new key at web3forms.com using that
+address and replace that value. There is no environment variable to set.
+
+Keeping it in the source is fine here: Web3Forms keys are public by design —
+they ship inside the page that submits the form either way, and the key alone
+only lets someone send mail to the inbox it is already registered to.
 
 > **Why not post from the server?** It used to, and it failed in production.
 > Relaying through a shared datacentre IP is exactly the traffic a form service

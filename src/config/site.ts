@@ -117,23 +117,6 @@ export const LOCATION_LABEL = "Mangaf, Kuwait";
 /** Domain shown in the demo mockups' browser chrome. */
 export const DISPLAY_DOMAIN = SITE_URL.replace(/^https?:\/\//, "");
 
-/**
- * Web3Forms access key for the contact form.
- *
- * Web3Forms access keys are public by design - they live in the page that
- * submits the form, and the key alone only lets someone send mail to the
- * inbox it is already registered to. So NEXT_PUBLIC_ is correct here.
- *
- * The key decides the destination: there is no "send to" field in the API.
- * To change where enquiries land, create a new key at https://web3forms.com
- * with that address and set NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY.
- */
-export const WEB3FORMS_ACCESS_KEY =
-  env(process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY) ||
-  "e6f145bb-075e-4944-83ff-e29eb218f09c";
-
-export const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
-
 /** Pre-filled message used by every WhatsApp link on the site. */
 export const WHATSAPP_MESSAGE =
   "Hello Webzivo, I am interested in building a website for my business.";
