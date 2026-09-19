@@ -11,6 +11,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { featuredProjectSlug, getProject, projects } from "@/config/projects";
 import { getService, services } from "@/config/services";
+import { siteConfig } from "@/config/site";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -128,7 +129,7 @@ export default async function ServicePage({ params }: Params) {
               </p>
 
               <BrowserFrame
-                url={`webzivo.com/work/${previewUrl(relatedProject.preview)}`}
+                url={`${siteConfig.displayDomain}/work/${previewUrl(relatedProject.preview)}`}
               >
                 <div className="aspect-[16/11]">
                   <SitePreview variant={relatedProject.preview} />

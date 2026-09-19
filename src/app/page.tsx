@@ -5,6 +5,8 @@ import { CtaBanner } from "@/components/sections/CtaBanner";
 import { Faq } from "@/components/sections/Faq";
 import { FeaturedDemo } from "@/components/sections/FeaturedDemo";
 import { Hero } from "@/components/sections/Hero";
+import { HowWeWork } from "@/components/sections/HowWeWork";
+import { Pricing } from "@/components/sections/Pricing";
 import { Process } from "@/components/sections/Process";
 import { Services } from "@/components/sections/Services";
 import { WhyWebzivo } from "@/components/sections/WhyWebzivo";
@@ -28,6 +30,8 @@ export default function HomePage() {
       <FeaturedDemo />
       <WhyWebzivo />
       <About />
+      <HowWeWork />
+      <Pricing />
       <Faq />
       <CtaBanner />
       <Contact />

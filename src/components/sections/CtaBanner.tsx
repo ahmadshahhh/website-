@@ -39,15 +39,8 @@ export function CtaBanner() {
         </Reveal>
 
         <Reveal delay={120}>
-          <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
-            <ButtonLink href="/#contact" variant="inverse" size="lg" withArrow>
-              Request a Website
-            </ButtonLink>
-            <ButtonLink
-              href={whatsAppLink()}
-              variant="inverseOutline"
-              size="lg"
-            >
+          <div className="mt-10 flex justify-center">
+            <ButtonLink href={whatsAppLink()} variant="inverse" size="lg">
               {siteConfig.isWhatsAppConfigured ? (
                 <Icon name="whatsapp" className="size-[18px]" />
               ) : null}

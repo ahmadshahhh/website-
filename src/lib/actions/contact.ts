@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import type { ContactState } from "@/lib/contact-state";
-import { isEmailDeliveryConfigured, sendEnquiryEmail } from "@/lib/email";
+import { sendEnquiryEmail } from "@/lib/email";
 import { readContactForm, validateContact } from "@/lib/validation";
 
 /**
@@ -50,8 +50,8 @@ async function getClientKey(): Promise<string> {
  * Handles a contact form submission.
  *
  * Order matters: bot check, then rate limit, then validation, then delivery.
- * The visitor is never told that email delivery is unconfigured in a way that
- * leaves them stuck - the UI offers WhatsApp and email instead.
+ * If delivery fails the UI offers WhatsApp and email instead, so a visitor is
+ * never left with nowhere to go.
  */
 export async function submitEnquiry(
   _previousState: ContactState,
@@ -90,22 +90,6 @@ export async function submitEnquiry(
       status: "invalid",
       message: "Please check the highlighted fields and try again.",
       errors,
-      values,
-      token,
-    };
-  }
-
-  if (!isEmailDeliveryConfigured()) {
-    // Honest state: the enquiry is valid but there is nowhere to send it yet.
-    console.info(
-      "[contact] Valid enquiry received but no email provider is configured. " +
-        "See src/lib/email.ts to connect one.",
-    );
-    return {
-      status: "unconfigured",
-      message:
-        "This form is not connected to an inbox yet, so your message was not sent.",
-      errors: {},
       values,
       token,
     };

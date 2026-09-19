@@ -51,9 +51,16 @@ export function Header() {
     };
     document.addEventListener("keydown", onKeyDown);
 
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const onBreakpointChange = (event: MediaQueryListEvent) => {
+      if (event.matches) setIsMenuOpen(false);
+    };
+    desktop.addEventListener("change", onBreakpointChange);
+
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKeyDown);
+      desktop.removeEventListener("change", onBreakpointChange);
     };
   }, [isMenuOpen]);
 
@@ -63,9 +70,12 @@ export function Header() {
     <header
       className={cn(
         "sticky top-0 z-50 transition-[background-color,border-color,box-shadow] duration-300",
-        isScrolled || isMenuOpen
-          ? "border-b border-line bg-white/85 shadow-[0_1px_20px_-8px_rgba(10,10,11,0.25)] backdrop-blur-xl supports-[backdrop-filter]:bg-white/75"
-          : "border-b border-transparent bg-paper",
+        isMenuOpen
+          ? // Solid, unblurred white so the header matches the open panel.
+            "border-b border-line bg-white"
+          : isScrolled
+            ? "border-b border-line bg-white/85 shadow-[0_1px_20px_-8px_rgba(10,10,11,0.25)] backdrop-blur-xl supports-[backdrop-filter]:bg-white/75"
+            : "border-b border-transparent bg-paper",
       )}
     >
       <Container>
@@ -138,22 +148,19 @@ export function Header() {
       <div
         id="mobile-menu"
         hidden={!isMenuOpen}
-        className="border-t border-line bg-white lg:hidden"
+        className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-y-auto overscroll-contain border-t border-line bg-white sm:top-[4.5rem] lg:hidden"
       >
         <Container>
           <nav aria-label="Mobile" className="py-4">
             <ul className="flex flex-col">
-              {navItems.map((item, index) => (
+              {navItems.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
                     onClick={closeMenu}
-                    className="flex items-center justify-between border-b border-line py-3.5 text-lg font-semibold text-ink transition-colors hover:text-muted"
+                    className="block border-b border-line py-4 text-lg font-semibold text-ink transition-colors hover:text-muted"
                   >
                     {item.label}
-                    <span className="eyebrow text-muted">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
                   </Link>
                 </li>
               ))}

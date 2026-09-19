@@ -30,7 +30,7 @@ export function Services() {
                   {service.description}
                 </p>
 
-                <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-5">
+                <div className="mt-7 border-t border-line pt-5">
                   <Link
                     href={`/services/${service.slug}`}
                     className="group/link inline-flex items-center gap-1.5 text-sm font-semibold text-ink"
@@ -40,12 +40,6 @@ export function Services() {
                       name="arrowRight"
                       className="size-4 transition-transform duration-200 group-hover/link:translate-x-1"
                     />
-                  </Link>
-                  <Link
-                    href="/#contact"
-                    className="text-sm font-medium text-muted underline-offset-4 transition-colors hover:text-ink hover:underline"
-                  >
-                    Request Website
                   </Link>
                 </div>
               </article>

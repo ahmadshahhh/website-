@@ -5,6 +5,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import { Eyebrow, Section } from "@/components/ui/Section";
 import { featuredProjectSlug, getProject, projects } from "@/config/projects";
+import { siteConfig } from "@/config/site";
 
 /**
  * Large showcase for one project.
@@ -15,7 +16,6 @@ import { featuredProjectSlug, getProject, projects } from "@/config/projects";
  */
 export function FeaturedDemo() {
   const project = getProject(featuredProjectSlug) ?? projects[0];
-  const hasLiveSite = Boolean(project.liveUrl);
 
   return (
     <Section tone="dark" className="overflow-hidden">
@@ -62,16 +62,16 @@ export function FeaturedDemo() {
 
           <Reveal delay={180}>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+              {/* h-auto + whitespace-normal: this label is long enough to
+                  overflow a fixed-height, nowrap button on narrow phones. */}
               <ButtonLink
-                href={project.liveUrl ?? `/work/${project.slug}`}
+                href="/work"
                 variant="inverse"
                 size="lg"
-                withArrow={!hasLiveSite}
+                withArrow
+                className="h-auto whitespace-normal py-3.5 text-center"
               >
-                View Demo
-                {hasLiveSite ? (
-                  <Icon name="arrowUpRight" className="size-4" />
-                ) : null}
+                See What Your Business Could Look Like
               </ButtonLink>
               <ButtonLink href="/#contact" variant="inverseOutline" size="lg">
                 Request a Similar Website
@@ -84,7 +84,7 @@ export function FeaturedDemo() {
         <Reveal delay={140} className="min-w-0">
           <BrowserFrame
             tone="dark"
-            url={`webzivo.com/work/${previewUrl(project.preview)}`}
+            url={`${siteConfig.displayDomain}/work/${previewUrl(project.preview)}`}
           >
             <div className="aspect-[16/11]">
               <SitePreview variant={project.preview} />

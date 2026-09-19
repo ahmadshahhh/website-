@@ -1,12 +1,19 @@
 import { ContactForm } from "@/components/ContactForm";
 import { Icon } from "@/components/icons";
+import { LocationLink } from "@/components/ui/LocationLink";
 import { Reveal } from "@/components/ui/Reveal";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { siteConfig, whatsAppLink } from "@/config/site";
 
+/** Shared styling for the square icon tiles in the location card. */
+const ICON_TILE =
+  "grid size-12 shrink-0 place-items-center rounded-xl border border-line bg-paper-soft text-ink";
+
 export function Contact() {
   return (
-    <Section id="contact" tone="soft">
+    // Extra bottom padding keeps the card clear of the floating WhatsApp
+    // button, which is pinned to the bottom-right of the viewport.
+    <Section id="contact" tone="soft" className="pb-28 sm:pb-32">
       <SectionHeading
         eyebrow="Contact"
         title="Let's Build Your Website"
@@ -21,105 +28,61 @@ export function Contact() {
           </div>
         </Reveal>
 
-        {/* Direct contact options */}
+        {/* Location, map and direct contact options */}
         <Reveal delay={120}>
-          <div className="flex h-full flex-col gap-6">
-            <div className="rounded-card border border-line bg-ink p-7 text-white sm:p-8">
-              <h3 className="text-lg font-bold tracking-[-0.015em]">
-                Prefer to message us?
-              </h3>
-              <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted-dark">
-                Send a message and describe your business — we&apos;ll reply
-                with what we&apos;d suggest.
-              </p>
+          <div className="flex h-full flex-col rounded-card border border-line bg-white p-7 sm:p-8">
+            <span className={ICON_TILE}>
+              <Icon name="mapPin" className="size-5" strokeWidth={1.5} />
+            </span>
 
-              <ul className="mt-7 space-y-3">
-                <li>
-                  <a
-                    href={whatsAppLink()}
-                    {...(siteConfig.isWhatsAppConfigured
-                      ? { target: "_blank", rel: "noopener noreferrer" }
-                      : {})}
-                    className="group flex items-center gap-4 rounded-xl border border-ink-line bg-ink-900 p-4 transition-colors duration-200 hover:border-ink-700 hover:bg-ink-800"
-                  >
-                    <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-whatsapp text-white">
-                      <Icon name="whatsapp" className="size-5" />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-[0.9375rem] font-semibold">
-                        WhatsApp
-                      </span>
-                      <span className="block truncate text-sm text-muted-dark">
-                        {siteConfig.isWhatsAppConfigured
-                          ? siteConfig.whatsAppDisplay
-                          : "Number coming soon — use the form"}
-                      </span>
-                    </span>
-                    <Icon
-                      name="arrowUpRight"
-                      className="ml-auto size-4 shrink-0 text-muted-dark transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                    />
-                  </a>
-                </li>
+            <h3 className="mt-5 text-lg font-bold tracking-[-0.015em] text-ink">
+              Location
+            </h3>
+            <p className="mt-2 text-[0.9375rem] leading-relaxed text-muted">
+              {siteConfig.address ? (
+                <>
+                  {siteConfig.address}
+                  <br />
+                </>
+              ) : null}
+              <LocationLink className="font-medium text-ink" />
+            </p>
 
-                {/* Email appears here only once NEXT_PUBLIC_CONTACT_EMAIL is set. */}
-                {siteConfig.isEmailConfigured ? (
-                  <li>
-                    <a
-                      href={`mailto:${siteConfig.email}`}
-                      className="group flex items-center gap-4 rounded-xl border border-ink-line bg-ink-900 p-4 transition-colors duration-200 hover:border-ink-700 hover:bg-ink-800"
-                    >
-                      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-white text-ink">
-                        <Icon name="mail" className="size-5" strokeWidth={1.5} />
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-[0.9375rem] font-semibold">
-                          Email
-                        </span>
-                        <span className="block truncate text-sm text-muted-dark">
-                          {siteConfig.email}
-                        </span>
-                      </span>
-                      <Icon
-                        name="arrowUpRight"
-                        className="ml-auto size-4 shrink-0 text-muted-dark transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                      />
-                    </a>
-                  </li>
-                ) : null}
-              </ul>
+            {/* Keyless Google Maps embed — no API key or billing account
+                needed. Lazy so it never delays the rest of the page. */}
+            <div className="mt-5 overflow-hidden rounded-xl border border-line">
+              <iframe
+                src={siteConfig.mapsEmbedUrl}
+                title={`Map showing Webzivo in ${siteConfig.locationLabel}`}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="block h-52 w-full border-0 sm:h-60"
+              />
             </div>
 
-            {/* Location */}
-            <div className="grow rounded-card border border-line bg-white p-7 sm:p-8">
-              <span className="grid size-10 place-items-center rounded-lg border border-line bg-paper-soft text-ink">
-                <Icon name="mapPin" className="size-5" strokeWidth={1.5} />
-              </span>
-
-              <h3 className="mt-5 text-lg font-bold tracking-[-0.015em] text-ink">
-                Location
-              </h3>
-              <p className="mt-2 text-[0.9375rem] leading-relaxed text-muted">
-                {siteConfig.address ? (
-                  <>
-                    {siteConfig.address}
-                    <br />
-                  </>
-                ) : null}
-                {siteConfig.country}
-              </p>
-
-              {siteConfig.isMapsConfigured ? (
+            {/* Icon-only contact shortcuts. They carry no visible text, so each
+                one needs an accessible name of its own. */}
+            <div className="mt-auto border-t border-line pt-6">
+              <p className="eyebrow text-muted">Message us</p>
+              <div className="mt-3.5 flex items-center gap-3">
                 <a
-                  href={siteConfig.mapsUrl}
+                  href={whatsAppLink()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink underline-offset-4 hover:underline"
+                  aria-label="Message Webzivo on WhatsApp"
+                  className={`${ICON_TILE} transition-colors duration-200 hover:border-ink hover:bg-ink hover:text-white`}
                 >
-                  Open in Google Maps
-                  <Icon name="arrowUpRight" className="size-4" />
+                  <Icon name="whatsapp" className="size-5" />
                 </a>
-              ) : null}
+
+                <a
+                  href={`mailto:${siteConfig.email}`}
+                  aria-label={`Email Webzivo at ${siteConfig.email}`}
+                  className={`${ICON_TILE} transition-colors duration-200 hover:border-ink hover:bg-ink hover:text-white`}
+                >
+                  <Icon name="mail" className="size-5" strokeWidth={1.5} />
+                </a>
+              </div>
             </div>
           </div>
         </Reveal>

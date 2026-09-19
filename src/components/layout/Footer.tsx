@@ -5,6 +5,7 @@ import { Logo } from "@/components/ui/Logo";
 import { navItems } from "@/config/nav";
 import { services } from "@/config/services";
 import { siteConfig, whatsAppLink } from "@/config/site";
+import { LocationLink } from "@/components/ui/LocationLink";
 
 const CURRENT_YEAR = 2026;
 
@@ -116,20 +117,7 @@ export function Footer() {
                       <br />
                     </>
                   ) : null}
-                  {siteConfig.country}
-                  {siteConfig.isMapsConfigured ? (
-                    <>
-                      {" · "}
-                      <a
-                        href={siteConfig.mapsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline underline-offset-4 transition-colors hover:text-white"
-                      >
-                        Directions
-                      </a>
-                    </>
-                  ) : null}
+                  <LocationLink className="hover:text-white" />
                 </span>
               </li>
             </ul>
