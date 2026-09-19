@@ -4,12 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Icon } from "@/components/icons";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { websiteTypeOptions } from "@/config/services";
-import {
-  WEB3FORMS_ACCESS_KEY,
-  WEB3FORMS_ENDPOINT,
-  siteConfig,
-  whatsAppLink,
-} from "@/config/site";
+import { siteConfig, whatsAppLink } from "@/config/site";
 import {
   readContactForm,
   validateContact,
@@ -36,6 +31,21 @@ import { cn } from "@/lib/utils";
  * server action used (src/lib/validation.ts).
  * -----------------------------------------------------------------------------
  */
+
+/**
+ * Web3Forms endpoint and access key.
+ *
+ * The key is written here rather than read from the environment. Web3Forms
+ * access keys are public by design - they sit in the page that submits the
+ * form, and the key alone only lets someone send mail to the inbox it is
+ * already registered to, so there is nothing to keep secret.
+ *
+ * The key also decides the destination: there is no "send to" field in the
+ * API. To change where enquiries land, create a new key at
+ * https://web3forms.com using that address and replace the value below.
+ */
+const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
+const WEB3FORMS_ACCESS_KEY = "e6f145bb-075e-4944-83ff-e29eb218f09c";
 
 type Status = "idle" | "sending" | "success" | "error";
 
