@@ -152,7 +152,7 @@ export function Footer() {
           </span>
         </div>
 
-        <div className="relative flex flex-col gap-3 border-t border-ink-line py-7 text-sm text-muted-dark sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex flex-col gap-3 border-t border-ink-line pb-[calc(1.75rem_+_env(safe-area-inset-bottom))] pt-7 text-sm text-muted-dark sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {CURRENT_YEAR} {siteConfig.name}. All rights reserved.
           </p>

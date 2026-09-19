@@ -91,7 +91,12 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Stops horizontal scroll from decorative overflow on small screens. */
+  /* SAFETY NET ONLY. Real overflow is fixed at the element that causes it -
+     see the min-w-0 notes on grid children and max-w-full in Button. This
+     just stops a decorative blur or future regression from scrolling the
+     page sideways. It is not a substitute for fixing the cause: with a
+     section that also sets overflow-hidden, oversized content is clipped
+     rather than scrolled, which reads as "cut off" instead of "scrollable". */
   overflow-x: hidden;
 }
 
@@ -113,6 +118,16 @@ body {
   letter-spacing: -0.035em;
   line-height: 1.04;
   text-wrap: balance;
+  /* A long unbroken word must break rather than push the heading past its
+     container - the cause of headings appearing clipped on phones. */
+  overflow-wrap: break-word;
+}
+
+/* Fluid size for the largest showcase heading. Matches the previous fixed
+   desktop size exactly, and scales down on phones where the old 2rem could
+   not fit a 350px column. */
+@utility heading-fluid {
+  font-size: clamp(1.75rem, 5.2vw + 0.5rem, 3rem);
 }
 
 /* Small uppercase mono labels used above section headings. */

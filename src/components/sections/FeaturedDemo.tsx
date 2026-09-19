@@ -25,14 +25,16 @@ export function FeaturedDemo() {
       />
 
       <div className="relative grid items-center gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
-        {/* Copy */}
-        <div>
+        {/* Copy. min-w-0 keeps this grid item from being widened by its own
+            content - without it the track grows past the viewport and the
+            section's overflow-hidden clips the result. */}
+        <div className="min-w-0">
           <Reveal>
             <Eyebrow tone="dark">
               {project.isDemo ? "Featured Demo" : "Featured Project"}
             </Eyebrow>
 
-            <h2 className="display mt-5 text-[2rem] text-white sm:text-[2.6rem] lg:text-[3rem]">
+            <h2 className="display heading-fluid mt-5 text-white">
               {project.title}
               {project.isDemo ? " Demo" : ""}
             </h2>
@@ -62,18 +64,22 @@ export function FeaturedDemo() {
 
           <Reveal delay={180}>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-              {/* h-auto + whitespace-normal: this label is long enough to
-                  overflow a fixed-height, nowrap button on narrow phones. */}
-              <ButtonLink
+                            <ButtonLink
                 href="/work"
                 variant="inverse"
                 size="lg"
                 withArrow
-                className="h-auto whitespace-normal py-3.5 text-center"
+                wrap
+                className="w-full sm:w-auto"
               >
                 See What Your Business Could Look Like
               </ButtonLink>
-              <ButtonLink href="/#contact" variant="inverseOutline" size="lg">
+              <ButtonLink
+                href="/#contact"
+                variant="inverseOutline"
+                size="lg"
+                className="w-full sm:w-auto"
+              >
                 Request a Similar Website
               </ButtonLink>
             </div>

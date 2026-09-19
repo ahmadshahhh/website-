@@ -34,7 +34,9 @@ export function WhatsAppButton() {
   return (
     <aside
       aria-label="Quick contact"
-      className="fixed bottom-5 right-5 z-40 print:hidden"
+      // env() keeps the button clear of the iOS home indicator and Safari's
+      // bottom toolbar; both resolve to 0 elsewhere, so the offset is unchanged.
+      className="fixed bottom-[calc(1.25rem_+_env(safe-area-inset-bottom))] right-[calc(1.25rem_+_env(safe-area-inset-right))] z-40 print:hidden"
     >
       {isConfigured ? (
         <a
