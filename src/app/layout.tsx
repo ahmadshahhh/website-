@@ -72,6 +72,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: "#0a0a0b",
   colorScheme: "light",
+  // Required for env(safe-area-inset-*) to report anything: without it iOS
+  // letterboxes the page and the insets resolve to 0, so content can sit
+  // under Safari's bottom toolbar and the home indicator.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
