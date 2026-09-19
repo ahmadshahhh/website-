@@ -2,48 +2,17 @@ import { Icon } from "@/components/icons";
 import { ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import { Section, SectionHeading } from "@/components/ui/Section";
+import {
+  pricingCustomQuote,
+  pricingNote,
+  pricingPlans,
+} from "@/config/pricing";
 import { whatsAppLink } from "@/config/site";
 
-type Plan = {
-  name: string;
-  /** Headline figure, e.g. "25 KD". Omitted for quote-only plans. */
-  price?: string;
-  /** Qualifier shown before the price, e.g. "From". */
-  prefix?: string;
-  /** Billing period shown after the price. */
-  period?: string;
-  /** Used instead of a price when the plan is quoted per project. */
-  priceNote?: string;
-  description: string;
-  highlighted?: boolean;
-};
-
-const PLANS: Plan[] = [
-  {
-    name: "Starter Website",
-    prefix: "From",
-    price: "25 KD",
-    period: "/month",
-    description:
-      "For small businesses that need a simple, professional website with their services, location, and contact options.",
-  },
-  {
-    name: "Business Website",
-    prefix: "From",
-    price: "30 KD",
-    period: "/month",
-    description:
-      "For growing businesses that need more pages, such as menus, services, galleries, or class schedules.",
-    highlighted: true,
-  },
-  {
-    name: "Advanced / E-commerce",
-    priceNote: "Custom quote",
-    description:
-      "For online stores and websites with special features.",
-  },
-];
-
+/**
+ * Pricing. Plans, prices and features all live in src/config/pricing.ts, and
+ * the FAQ cost answer in src/config/faq.ts quotes the same figures.
+ */
 export function Pricing() {
   return (
     <Section id="pricing" tone="soft">
@@ -53,9 +22,10 @@ export function Pricing() {
         description="Pick the plan that fits your business. Every plan is billed monthly, with no long contract to sign."
       />
 
-      {/* One column until md, then three - two-up would leave an odd card. */}
-      <ul className="mt-14 grid gap-5 md:grid-cols-3">
-        {PLANS.map((plan, index) => (
+      {/* Two cards, so they are capped rather than stretched across a wide
+          screen, and stack to a single column below md. */}
+      <ul className="mx-auto mt-14 grid max-w-4xl gap-5 md:grid-cols-2">
+        {pricingPlans.map((plan, index) => (
           <li key={plan.name}>
             <Reveal delay={index * 90} className="h-full">
               <article
@@ -66,7 +36,7 @@ export function Pricing() {
                 }
               >
                 {plan.highlighted ? (
-                  <span className="eyebrow absolute -top-3 left-7 inline-flex items-center gap-1.5 rounded-full bg-accent-bright px-3 py-1.5 text-ink">
+                  <span className="eyebrow absolute -top-3 left-7 inline-flex items-center rounded-full bg-accent-bright px-3 py-1.5 text-ink">
                     Most Popular
                   </span>
                 ) : null}
@@ -82,61 +52,64 @@ export function Pricing() {
                 </h3>
 
                 <p className="mt-5 flex flex-wrap items-baseline gap-x-2">
-                  {plan.prefix ? (
-                    <span
-                      className={
-                        plan.highlighted
-                          ? "text-sm font-medium text-muted-dark"
-                          : "text-sm font-medium text-muted"
-                      }
-                    >
-                      {plan.prefix}
-                    </span>
-                  ) : null}
-
-                  {plan.price ? (
-                    <>
-                      <span
-                        className={
-                          plan.highlighted
-                            ? "display text-[2rem] text-white"
-                            : "display text-[2rem] text-ink"
-                        }
-                      >
-                        {plan.price}
-                      </span>
-                      <span
-                        className={
-                          plan.highlighted
-                            ? "text-sm font-medium text-muted-dark"
-                            : "text-sm font-medium text-muted"
-                        }
-                      >
-                        {plan.period}
-                      </span>
-                    </>
-                  ) : (
-                    <span
-                      className={
-                        plan.highlighted
-                          ? "display text-[1.6rem] text-white"
-                          : "display text-[1.6rem] text-ink"
-                      }
-                    >
-                      {plan.priceNote}
-                    </span>
-                  )}
+                  <span
+                    className={
+                      plan.highlighted
+                        ? "text-sm font-medium text-muted-dark"
+                        : "text-sm font-medium text-muted"
+                    }
+                  >
+                    {plan.prefix}
+                  </span>
+                  <span
+                    className={
+                      plan.highlighted
+                        ? "display text-[2rem] text-white"
+                        : "display text-[2rem] text-ink"
+                    }
+                  >
+                    {plan.price}
+                  </span>
+                  <span
+                    className={
+                      plan.highlighted
+                        ? "text-sm font-medium text-muted-dark"
+                        : "text-sm font-medium text-muted"
+                    }
+                  >
+                    {plan.period}
+                  </span>
                 </p>
 
-                <p
+                <ul
                   className={
                     plan.highlighted
-                      ? "mt-4 grow text-[0.9375rem] leading-relaxed text-muted-dark"
-                      : "mt-4 grow text-[0.9375rem] leading-relaxed text-muted"
+                      ? "mt-7 grow space-y-3 border-t border-ink-line pt-6"
+                      : "mt-7 grow space-y-3 border-t border-line pt-6"
                   }
                 >
-                  {plan.description}
-                </p>
+                  {plan.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className={
+                        plan.highlighted
+                          ? "flex items-start gap-2.5 text-[0.9375rem] leading-relaxed text-muted-dark"
+                          : "flex items-start gap-2.5 text-[0.9375rem] leading-relaxed text-muted"
+                      }
+                    >
+                      <Icon
+                        name="check"
+                        className={
+                          plan.highlighted
+                            ? "mt-0.5 size-4 shrink-0 text-accent-bright"
+                            : "mt-0.5 size-4 shrink-0 text-accent"
+                        }
+                        strokeWidth={2.5}
+                      />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
               </article>
             </Reveal>
           </li>
@@ -144,14 +117,16 @@ export function Pricing() {
       </ul>
 
       <Reveal delay={120}>
-        <div className="mt-10 flex flex-col items-center gap-5 text-center">
-          <p className="max-w-xl text-[0.9375rem] leading-relaxed text-muted">
-            All plans include hosting, security, and updates. Contact us for a
-            free consultation.
+        <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-5 text-center">
+          <p className="text-[0.9375rem] leading-relaxed text-muted">
+            {pricingNote}
+          </p>
+          <p className="text-[0.9375rem] leading-relaxed text-muted">
+            {pricingCustomQuote.text}
           </p>
           <ButtonLink href={whatsAppLink()} size="lg">
             <Icon name="whatsapp" className="size-[18px]" />
-            Ask on WhatsApp
+            {pricingCustomQuote.ctaLabel}
           </ButtonLink>
         </div>
       </Reveal>

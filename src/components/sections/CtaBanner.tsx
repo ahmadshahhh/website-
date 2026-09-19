@@ -29,22 +29,37 @@ export function CtaBanner() {
           </span>
 
           <h2 className="display mt-7 text-[2.25rem] text-white sm:text-[3rem] lg:text-[3.6rem]">
-            Ready to Build Your Website?
+            Ready to Take Your Business Online?
           </h2>
 
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-dark sm:text-lg">
-            Tell us about your business and what you need. We&apos;ll help you
-            plan the right website for your business.
+            Your customers are already searching online. Give them a
+            professional place to find your business, learn about your
+            services, and contact you.
           </p>
         </Reveal>
 
         <Reveal delay={120}>
-          <div className="mt-10 flex justify-center">
-            <ButtonLink href={whatsAppLink()} variant="inverse" size="lg">
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <ButtonLink
+              href={whatsAppLink()}
+              variant="inverse"
+              size="lg"
+              className="w-full sm:w-auto"
+            >
               {siteConfig.isWhatsAppConfigured ? (
                 <Icon name="whatsapp" className="size-[18px]" />
               ) : null}
-              Contact Webzivo
+              Let&apos;s Build Your Website
+            </ButtonLink>
+
+            <ButtonLink
+              href="/#contact"
+              variant="inverseOutline"
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              Use the contact form
             </ButtonLink>
           </div>
         </Reveal>
