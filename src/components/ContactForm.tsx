@@ -165,6 +165,8 @@ export function ContactForm() {
         },
         body: JSON.stringify({
           access_key: WEB3FORMS_ACCESS_KEY,
+          // Empty is the value Web3Forms treats as "not a bot".
+          botcheck: "",
           subject: `New website request – ${values.fullName}`,
           from_name: "Webzivo Website",
           // Lets you hit reply in your inbox and reach the enquirer directly.
@@ -280,6 +282,16 @@ export function ContactForm() {
         noValidate
         className="space-y-5"
       >
+        {/* Web3Forms' own honeypot. It rejects any submission that arrives
+            with a non-empty botcheck, so this stays unchecked for people. */}
+        <input
+          type="checkbox"
+          name="botcheck"
+          style={{ display: "none" }}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+
         {/* Honeypot - hidden from people, irresistible to bots. */}
         <div
           aria-hidden="true"
