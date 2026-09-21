@@ -165,6 +165,11 @@ export function ContactForm() {
         },
         body: JSON.stringify({
           access_key: WEB3FORMS_ACCESS_KEY,
+          // Read back rather than hardcoded, so the hidden checkbox actually
+          // does something. Nobody ever ticks it, so FormData omits it and
+          // this sends "" - the value Web3Forms accepts. A bot that fills the
+          // rendered form ticks it, sends "on", and Web3Forms drops it.
+          botcheck: (formData.get("botcheck") as string) ?? "",
           subject: `New website request – ${values.fullName}`,
           from_name: "Webzivo Website",
           // Lets you hit reply in your inbox and reach the enquirer directly.
@@ -280,6 +285,16 @@ export function ContactForm() {
         noValidate
         className="space-y-5"
       >
+        {/* Web3Forms' own honeypot. It rejects any submission that arrives
+            with a non-empty botcheck, so this stays unchecked for people. */}
+        <input
+          type="checkbox"
+          name="botcheck"
+          style={{ display: "none" }}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+
         {/* Honeypot - hidden from people, irresistible to bots. */}
         <div
           aria-hidden="true"

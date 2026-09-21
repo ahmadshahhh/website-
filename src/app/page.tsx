@@ -1,5 +1,4 @@
 import { About } from "@/components/sections/About";
-import { Benefits } from "@/components/sections/Benefits";
 import { Contact } from "@/components/sections/Contact";
 import { CtaBanner } from "@/components/sections/CtaBanner";
 import { Faq } from "@/components/sections/Faq";
@@ -33,7 +32,6 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <Benefits />
       <Positioning />
       <Services />
       <WhyWebsite />
