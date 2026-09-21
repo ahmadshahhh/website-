@@ -165,8 +165,11 @@ export function ContactForm() {
         },
         body: JSON.stringify({
           access_key: WEB3FORMS_ACCESS_KEY,
-          // Empty is the value Web3Forms treats as "not a bot".
-          botcheck: "",
+          // Read back rather than hardcoded, so the hidden checkbox actually
+          // does something. Nobody ever ticks it, so FormData omits it and
+          // this sends "" - the value Web3Forms accepts. A bot that fills the
+          // rendered form ticks it, sends "on", and Web3Forms drops it.
+          botcheck: (formData.get("botcheck") as string) ?? "",
           subject: `New website request – ${values.fullName}`,
           from_name: "Webzivo Website",
           // Lets you hit reply in your inbox and reach the enquirer directly.
